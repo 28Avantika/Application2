@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Summary</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.0/socket.io.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h3 class="center-align">Daily Weather Summaries</h3>
+
+        <table class="highlight centered">
+            <thead>
+                <tr>
+                    <th>City</th>
+                    <th>Main Condition</th>
+                    <th>Temp (°C)</th>
+                    <th>Feels Like (°C)</th>
+                    <th>Timestamp (Human-Readable)</th>
+                </tr>
+            </thead>
+            <tbody id="weather-table">
+                {% for summary in summaries %}
+                <tr>
+                    <td>{{ summary[0] }}</td>
+                    <td>{{ summary[1] }}</td>
+                    <td>{{ summary[2] }}</td>
+                    <td>{{ summary[3] }}</td>
+                    <td>{{ summary[4] | datetime }}</td>  <!-- Use the datetime filter -->
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        var socket = io();
+
+        // Listen for new weather data
+        socket.on('new_weather_data', function(data) {
+            var date = new Date(data.summary[4] * 1000);  // Convert Unix timestamp to readable date
+            var formattedDate = date.toLocaleString();  // Format the date
+
+            var newRow = `<tr>
+                <td>${data.summary[0]}</td>
+                <td>${data.summary[1]}</td>
+                <td>${data.summary[2]}</td>
+                <td>${data.summary[3]}</td>
+                <td>${formattedDate}</td>
+            </tr>`;
+            document.getElementById('weather-table').innerHTML = newRow + document.getElementById('weather-table').innerHTML;
+        });
+    </script>
+</body>
+</html>
